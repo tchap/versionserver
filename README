@@ -1,0 +1,9 @@
+versionserver
+=============
+
+A tiny OTP application that generates subsequent build numbers for projects
+according to the version number received.
+
+The last build numbers for all projects are being kept in Mnesia.
+Since there is a single process handling all request for a particular project,
+we don't need transactions and we can bypass all the transaction protocols.
