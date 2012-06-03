@@ -2,11 +2,11 @@
  [
   {description, ""},
   {vsn, "1"},
-  {registered, []},
+  {registered, [versionserver]},
   {applications, [
                   kernel,
                   stdlib
                  ]},
   {mod, { versionserver_app, []}},
-  {env, []}
+  {env, [{hibernate_workers, true}]}
  ]}.

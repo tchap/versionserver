@@ -1,5 +1,5 @@
 
--module(versionserver_sup).
+-module(versionserver_repo_sup).
 
 -behaviour(supervisor).
 
@@ -24,7 +24,5 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-	{ok, { {one_for_one, 5, 10}, 
-	       [CHILD(versionserver, worker),
-		CHILD(versionserver_repo_sup, supervisor)]} }.
+	{ok, { {simple_one_for_one, 5, 10}, []} }.
 
