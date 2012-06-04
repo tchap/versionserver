@@ -5,8 +5,9 @@
   {registered, [versionserver]},
   {applications, [
                   kernel,
-                  stdlib
+                  stdlib,
+		  mnesia
                  ]},
   {mod, { versionserver_app, []}},
-  {env, [{db_dir, "/tmp/versionserver"}]}
+  {env, []}
  ]}.
