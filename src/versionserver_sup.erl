@@ -10,7 +10,8 @@
 -export([init/1]).
 
 %% Helper macro for declaring children of supervisor
--define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
+-define(CHILD(I, Type, Shutdown), 
+	{I, {I, start_link, []}, permanent, Shutdown, Type, [I]}).
 
 %% ===================================================================
 %% API functions
@@ -25,6 +26,6 @@ start_link() ->
 
 init([]) ->
 	{ok, { {one_for_one, 5, 10}, 
-	       [CHILD(versionserver, worker),
-		CHILD(versionserver_repo_sup, supervisor)]} }.
+	       [?CHILD(versionserver_serv, worker, 5000),
+		?CHILD(versionserver_proj_sup, supervisor, 30000)]} }.
 
