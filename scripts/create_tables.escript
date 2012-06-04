@@ -3,8 +3,6 @@
 
 -include_lib("versionserver/include/versionserver_proj.hrl").
 
--define(TABLE_NAME, versionserver_project).
-
 main([Dirname]) ->
 	case filelib:ensure_dir(Dirname) of
 		ok ->
