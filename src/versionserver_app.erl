@@ -10,7 +10,8 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    versionserver_sup:start_link().
+    Pid = versionserver_sup:start_link(),
+    {ok, Pid}.
 
 stop(_State) ->
     ok.
