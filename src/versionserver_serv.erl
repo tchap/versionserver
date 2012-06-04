@@ -3,7 +3,7 @@
 -behaviour(gen_server).
 
 %% API functions
--export([start/2, start_link/2, get_build_number/3, stop/1]).
+-export([start/2, start_link/2, get_build_number/3, delete_project/2, stop/1]).
 
 %% Server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -28,6 +28,9 @@ start_link(_Name, _ProjSup) ->
 get_build_number(Name, Proj, Version={Maj, Min, Rel})
     when is_atom(Proj), is_integer(Maj), is_integer(Min), is_integer(Rel) ->
 	gen_server:call(Name, {build_number, Proj, Version}).
+
+delete_project(Name, Proj) when is_atom(Proj) ->
+	gen_server:cast(Name, {delete_project, Proj}).
 
 stop(Name) ->
 	gen_server:call(Name, stop).
@@ -54,8 +57,16 @@ handle_call({build_number, Proj, Version}, From, State) ->
 handle_call(stop, _From, State) ->
 	{stop, normal, ok, State}.
 
-handle_cast(_Request, State) ->
-	{noreply, State}.
+handle_cast(Msg={delete_project, Proj}, State) ->
+	Projects = State#projects,
+	case dict:find(Proj, Projects) of
+		{ok, Id} ->
+			gen_server:call(Id, Msg),
+			UpdatedProjects = dict:erase(Id, Projects),
+			{noreply, State#state{projects=UpdatedProjects}};
+		error ->
+			{noreply, State}
+	end.
 
 handle_info(Info, State) ->
 	{noreply, State}.
