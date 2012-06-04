@@ -18,12 +18,12 @@
 start(Name, ProjSup) when is_pid(ProjSup) ->
 	gen_server:start({local, Name}, ?MODULE, ProjSup, []);
 start(_Name, _ProjSup) ->
-	{error, {badarg, "argument must be a pid"}}.
+	{error, {badarg, "second argument must be a pid"}}.
 
 start_link(Name, ProjSup) when is_pid(ProjSup) ->
 	gen_server:start_link({local, Name}, ?MODULE, ProjSup, []).
-start(_Name, _ProjSup) ->
-	{error, {badarg, "argument must be a pid"}}.
+start_link(_Name, _ProjSup) ->
+	{error, {badarg, "second argument must be a pid"}}.
 
 get_build_number(Name, Proj, Version={Maj, Min, Rel})
     when is_atom(Proj), is_integer(Maj), is_integer(Min), is_integer(Rel) ->
