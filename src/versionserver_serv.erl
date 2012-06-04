@@ -2,6 +2,8 @@
 
 -behaviour(gen_server).
 
+-define(PROJ_SUP, version_proj_sup).
+
 %% API functions
 -export([start/2, start_link/2, get_build_number/3, delete_project/2, stop/1]).
 
@@ -9,21 +11,18 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
 	 terminate/2, code_change/3]).
 
--record(state, {projsup, projects=dict:new()}).
+%% Server state record
+-record(state, {projects=dict:new()}).
 
 %% ===================================================================
 %% API functions
 %% ===================================================================
 
-start(Name, ProjSup) when is_pid(ProjSup) ->
-	gen_server:start({local, Name}, ?MODULE, ProjSup, []);
-start(_Name, _ProjSup) ->
-	{error, {badarg, "second argument must be a pid"}}.
+start(Name) ->
+	gen_server:start({local, Name}, ?MODULE, [], []).
 
-start_link(Name, ProjSup) when is_pid(ProjSup) ->
-	gen_server:start_link({local, Name}, ?MODULE, ProjSup, []).
-start_link(_Name, _ProjSup) ->
-	{error, {badarg, "second argument must be a pid"}}.
+start_link(Name) ->
+	gen_server:start_link({local, Name}, ?MODULE, [], []).
 
 get_build_number(Name, Proj, Version={Maj, Min, Rel})
     when is_atom(Proj), is_integer(Maj), is_integer(Min), is_integer(Rel) ->
@@ -39,8 +38,9 @@ stop(Name) ->
 %% Server callbacks
 %% ===================================================================
 
-init(ProjSup) ->
-	{ok, #state{projsup=ProjSup}}.
+init([]) ->
+	State = #state{},
+	{ok, State}.
 
 handle_call({build_number, Proj, Version}, From, State) ->
 	Projects = State#projects,
@@ -49,7 +49,7 @@ handle_call({build_number, Proj, Version}, From, State) ->
 			gen_server:cast(Id, {build_number, Proj, Version, Id}),
 			{noreply, State};
 		error ->
-			Id = supervisor:start_child(State#projsup, Proj),
+			Id = supervisor:start_child(?PROJ_SUP, Proj),
 			UpdatedProjects = dict:store(Proj, Id, Projects),
 			gen_server:cast(Id, {build_number, Proj, Version, Id}),
 			{noreply, State#state{projects=UpdatedProjects}}
