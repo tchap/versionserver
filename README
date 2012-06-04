@@ -9,4 +9,4 @@ Since there is a single process handling all request for a particular project,
 we don't need transactions and we can bypass all the transaction protocols.
 
 NOTE: This project is an early prototype at the moment!
-      Not all error conditions are handler properly, use with caution!
+      Not all error conditions are handled properly, use with caution!
