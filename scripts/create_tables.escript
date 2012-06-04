@@ -1,5 +1,5 @@
 #!/usr/bin/env escript
-% vim: set filetype=erlang
+%% -*- erlang -*-
 %%! -pz ../versionserver
 
 -include_lib("versionserver/include/versionserver_proj.hrl").
