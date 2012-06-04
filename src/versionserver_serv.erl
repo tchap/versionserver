@@ -5,7 +5,7 @@
 -define(PROJ_SUP, version_proj_sup).
 
 %% API functions
--export([start/2, start_link/2, get_build_number/3, delete_project/2, stop/1]).
+-export([start/1, start_link/1, get_build_number/3, delete_project/2, stop/1]).
 
 %% Server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -43,22 +43,22 @@ init([]) ->
 	{ok, State}.
 
 handle_call({build_number, Proj, Version}, From, State) ->
-	Projects = State#projects,
+	Projects = State#state.projects,
 	case dict:find(Proj, Projects) of
 		{ok, Id} ->
-			gen_server:cast(Id, {build_number, Proj, Version, Id}),
+			gen_server:cast(Id, {build_number, Proj, Version, From}),
 			{noreply, State};
 		error ->
 			Id = supervisor:start_child(?PROJ_SUP, Proj),
 			UpdatedProjects = dict:store(Proj, Id, Projects),
-			gen_server:cast(Id, {build_number, Proj, Version, Id}),
+			gen_server:cast(Id, {build_number, Proj, Version, From}),
 			{noreply, State#state{projects=UpdatedProjects}}
 	end;
 handle_call(stop, _From, State) ->
 	{stop, normal, ok, State}.
 
 handle_cast(Msg={delete_project, Proj}, State) ->
-	Projects = State#projects,
+	Projects = State#state.projects,
 	case dict:find(Proj, Projects) of
 		{ok, Id} ->
 			gen_server:call(Id, Msg),
@@ -68,7 +68,7 @@ handle_cast(Msg={delete_project, Proj}, State) ->
 			{noreply, State}
 	end.
 
-handle_info(Info, State) ->
+handle_info(_Info, State) ->
 	{noreply, State}.
 
 terminate(_Reason, _State) ->
