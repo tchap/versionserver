@@ -21,7 +21,7 @@ start_link() ->
 
 init([]) ->
 	{ok, { {simple_one_for_one, 5, 10},
-	       [{project,
+	       [{versionserver_project,
 		 {versionserver_proj, start_link, []},
 		 permanent, 5000, worker, [versionserver_proj]}
 	       ]} }.
