@@ -8,5 +8,5 @@
                   stdlib
                  ]},
   {mod, { versionserver_app, []}},
-  {env, [{hibernate_workers, true}]}
+  {env, [{db_dir, "/tmp/versionserver"}]}
  ]}.
