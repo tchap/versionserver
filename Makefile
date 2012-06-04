@@ -6,4 +6,4 @@ all:
 	./rebar compile
 
 install:
-	./scripts/install.escript '$(DBDIR)'
+	./scripts/create_tables.escript '$(DBDIR)'
