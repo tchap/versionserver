@@ -10,7 +10,8 @@ main([Dirname]) ->
 			install_database(Dirname);
 		{error, Reason} ->
 			io:format(standard_error, 
-				  "I/O error occured: ~w~n", [Reason]),
+				  "Failed to create Mnesia directory: ~w~n",
+				  [Reason]),
 			halt(1)
 	end;
 
