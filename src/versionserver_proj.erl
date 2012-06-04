@@ -8,6 +8,8 @@
 %% Server callbacks
 -export([init/1]).
 
+-record(state, {versions})
+
 %% ===================================================================
 %% API functions
 %% ===================================================================
@@ -21,3 +23,19 @@ start_link(Project) when is_atom(Project) ->
 
 init(Project) ->
 	.
+
+handle_call({get_build_number, 
+	     Proj, Version={Maj, Min, Rel}, Id}, _From, State) ->
+	.
+
+handle_cast({delete_project, Proj}, State) ->
+	.
+
+handle_info(_Info, State) ->
+	{noreply, State}.
+
+terminate(Reason, State) ->
+	ok.
+
+code_change(OldVsn, State, Extra) ->
+	{ok, State}.
