@@ -1,4 +1,5 @@
 #!/usr/bin/env escript
+% vim: set filetype=erlang
 %%! -pz ../versionserver
 
 -include_lib("versionserver/include/versionserver_proj.hrl").
@@ -17,7 +18,7 @@ main(_) ->
 	usage().
 
 usage() ->
-	io:format("Usage: install.escript <directory>"),
+	io:format("Usage: create_tables.escript <directory>"),
 	halt(1).
 
 install_database(Dirname) ->
