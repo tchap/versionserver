@@ -1,8 +1,17 @@
 {application, versionserver,
  [
-  {description, ""},
+  {description, "A RESTful web service managing project build numbers"},
   {vsn, "1"},
-  {registered, [versionserver]},
+  {registered, [
+  		versionserver, 
+  		versionserver_sup
+	       ]},
+  {modules, [
+  	     versionserver_app,
+  	     versionserver, 
+	     versionserver_sup, 
+	     versionserver_proj
+	    ]},
   {applications, [
                   kernel,
                   stdlib,
