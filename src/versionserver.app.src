@@ -1,3 +1,4 @@
+%% vim: set filetype=erlang:
 {application, versionserver,
  [
   {description, "A RESTful web service managing project build numbers"},
