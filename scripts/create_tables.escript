@@ -37,7 +37,8 @@ install_database(Dirname) ->
 create_tables() ->
 	application:start(mnesia),
 	case mnesia:create_table(versionserver_proj,
-				 [{attributes, 
+				 [{type, bag},
+				  {attributes, 
 				   record_info(fields, versionserver_proj)},
 		   		  {index, [#versionserver_proj.version]},
 			  	  {disc_copies, [node()]}]) of
