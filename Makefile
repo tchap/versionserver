@@ -4,6 +4,3 @@ DBDIR=/tmp/versionserver_db
 
 all:
 	./rebar compile
-
-install:
-	./scripts/create_tables.escript '$(DBDIR)'
