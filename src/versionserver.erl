@@ -83,7 +83,7 @@ cast_to_project(Proj, Request) ->
 		[{Proj, Pid}] ->
 			Pid;
 		[] ->
-			Pid = gen_server:start_link(?PROJ_MODULE, [Proj], []),
+			Pid = versionserver_proj:start_link(Proj),
 			ets:insert(?MODULE, {Proj, Pid}),
 			Pid
 	end,
