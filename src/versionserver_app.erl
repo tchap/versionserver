@@ -10,8 +10,14 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    Pid = versionserver_sup:start_link(),
-    {ok, Pid}.
+	Dirname = application:get_env(db_dir),
+	case filelib:ensure_dir(Dirname) of
+		ok -> 
+			Pid = versionserver_sup:start_link(),
+			{ok, Pid};
+		Error ->
+			Error
+	end.
 
 stop(_State) ->
-    ok.
+	ok.

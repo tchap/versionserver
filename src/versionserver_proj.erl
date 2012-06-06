@@ -39,19 +39,13 @@ stop(ProjPid) ->
 %% ===================================================================
 
 init(Project) ->
-	try
-		DbPath = get_dbfile_path(Project),
-		case dets:open_file(Project, [{auto_save, 0},
-					      {file, DbPath}]) of
-			{ok, Name} ->
-				{ok, #state{table=Name}};
-			{error, Reason} ->
-				throw(Reason)
-		end
-	of
-		{ok, State} -> {ok, State}
-	catch throw:Throw ->
-		{stop, Throw}
+	DbPath = get_dbfile_path(Project),
+	case dets:open_file(Project, [{auto_save, 0},
+				      {file, DbPath}]) of
+		{ok, Name} ->
+			{ok, #state{table=Name}};
+		{error, Reason} ->
+			{stop, Reason}
 	end.
 
 handle_call(stop, _From, State) ->
@@ -93,15 +87,7 @@ code_change(_OldVsn, State, _Extra) ->
 get_dbfile_path(Proj) ->
 	Dirname = application:get_env(db_dir),
 	Filename = lists:concat([Proj, ".dets"]),
-	Path = file:join(Dirname, Filename),
-	case filelib:is_file(Path) of
-		true -> Path;
-		false ->
-			case filelib:ensure_dir(Dirname) of
-				ok -> Path;
-				{error, Reason} -> throw(Reason)
-			end
-	end.
+	file:join(Dirname, Filename).
 
 next_buildnum(Table, Version) ->
 	dets:update_counter(Table, Version, 1).
