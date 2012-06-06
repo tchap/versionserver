@@ -3,7 +3,8 @@
 -behaviour(gen_server).
 
 %% API functions
--export([start_link/1]).
+-export([start/1, start_link/1, stop/1,
+	 reply_build_number/3, set_build_number/3]).
 
 %% Server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -15,8 +16,23 @@
 %% API functions
 %% ===================================================================
 
+start(Project) when is_atom(Project) ->
+	get_server:start(?MODULE, [Project], []).
+
 start_link(Project) when is_atom(Project) ->
 	gen_server:start_link(?MODULE, [Project], []).
+
+reply_build_number(ProjPid, Version, To) ->
+	gen_server:cast(ProjPid, {reply_build_number, Version, To}).
+
+set_build_number(ProjPid, Version, Build) ->
+	gen_server:cast(ProjPid, {set_build_number, Version, Build}).
+
+delete_project(ProjPid) ->
+	gen_server:cast(ProjPid, delete_project).
+
+stop(ProjPid) ->
+	get_server:call(ProjPid, stop).
 
 %% ===================================================================
 %% Server callbacks

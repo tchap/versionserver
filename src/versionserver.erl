@@ -59,7 +59,8 @@ handle_cast({set_build_number, Proj, Version, Build}, State) ->
 	{noreply, State};
 handle_cast({delete_project, Proj}, State) ->
 	Pid = get_proj_pid(Proj),
-	versionserver_proj:delete_project(Pid, Proj),
+	versionserver_proj:delete_project(Pid),
+	versionserver_proj:stop(Pid),
 	{noreply, State}.
 
 handle_info({'EXIT', ProjPid, _Reason}, State) ->
