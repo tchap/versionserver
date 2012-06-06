@@ -4,13 +4,13 @@
 
 %% API functions
 -export([start/1, start_link/1, stop/1,
-	 reply_build_number/3, set_build_number/3]).
+	 reply_build_number/3, set_build_number/3, delete_project/1]).
 
 %% Server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
 	 terminate/2, code_change/3]).
 
--record(state, {proj}).
+-record(state, {table}).
 
 %% ===================================================================
 %% API functions
@@ -39,33 +39,48 @@ stop(ProjPid) ->
 %% ===================================================================
 
 init(Project) ->
-	{ok, #state{proj=Project}}.
+	try
+		DbPath = get_dbfile_path(Project),
+		case dets:open_file(Project, [{auto_save, 0},
+					      {file, DbPath}]) of
+			{ok, Name} ->
+				{ok, #state{table=Name}};
+			{error, Reason} ->
+				throw(Reason)
+		end
+	of
+		{ok, State} -> {ok, State}
+	catch throw:Throw ->
+		{stop, Throw}
+	end.
 
-handle_call(_Request, _From, State) ->
-	{reply, ok, State}.
+handle_call(stop, _From, State) ->
+	{stop, normal, ok, State}.
 
-handle_cast({get_build_number, Version, Id}, State) ->
-	case get_build_number(State#state.proj, Version) of
+handle_cast({reply_build_number, Version, To}, State) ->
+	case next_buildnum(State#state.table, Version) of
 		Build when is_integer(Build) ->
-			gen_server:reply(Id, Build),
-			ok = set_build_number(State#state.proj,
-					      Version, Build + 1),
+			gen_server:reply(To, Build),
 			{noreply, State};
 		{error, Reason} ->
-			gen_server:reply(Id, {error, Reason}),
+			gen_server:reply(To, {error, Reason}),
 			{stop, Reason, State};
-		_ ->
-			Reason = unknown_error,
-			gen_server:reply(Id, {error, Reason}),
-			{stop, Reason, State}
+		Otherwise ->
+			gen_server:reply(To, {error, Otherwise}),
+			{stop, Otherwise, State}
 	end;
-handle_cast({delete_project, _Proj}, State) ->
+handle_cast({set_build_number, Version, Build}, State) ->
+	set_buildnum(State#state.table, Version, Build),
+	{noreply, State};
+handle_cast(delete_project, State) ->
+	del_project(State#state.table),
 	{noreply, State}.
 
 handle_info(_Info, State) ->
 	{noreply, State}.
 
-terminate(_Reason, _State) ->
+terminate(_Reason, State) ->
+	dets:close(State#state.table),
 	ok.
 
 code_change(_OldVsn, State, _Extra) ->
@@ -75,18 +90,30 @@ code_change(_OldVsn, State, _Extra) ->
 %% Private functions
 %% ===================================================================
 
-get_build_number(Proj, {Maj, Min, Rel}) ->
-	Version = list_to_atom(lists:concat([Maj, '.', Min, '.', Rel])),
-	Pattern = {Proj, Version, '$1'},
-	Fun = fun() -> 
-		mnesia:dirty_match_object(versionserver_proj, Pattern) end,
-	try mnesia:sync_dirty(Fun, []) of
-		{Proj, Version, Build} when is_integer(Build) ->
-			Build;
-		_ -> {error, unknown_error}
-	catch exit:Exit ->
-		{error, Exit}
+get_dbfile_path(Proj) ->
+	Dirname = application:get_env(db_dir),
+	Filename = lists:concat([Proj, ".dets"]),
+	Path = file:join(Dirname, Filename),
+	case filelib:is_file(Path) of
+		true -> Path;
+		false ->
+			case filelib:ensure_dir(Dirname) of
+				ok -> Path;
+				{error, Reason} -> throw(Reason)
+			end
 	end.
 
-set_build_number(_Proj, {_Maj, _Min, _Rel}, _Build) ->
-	ok.
+next_buildnum(Table, Version) ->
+	dets:update_counter(Table, Version, 1).
+
+set_buildnum(Table, Version, Build) ->
+	case dets:insert(Table, {Version, Build}) of
+		ok -> ok;
+		{error, Reason} -> erlang:exit(Reason)
+	end.
+
+del_project(Table) ->
+	case dets:delete_all_objects(Table) of
+		ok -> ok;
+		{error, Reason} -> erlang:exit(Reason)
+	end.

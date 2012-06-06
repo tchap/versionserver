@@ -15,9 +15,8 @@
 	    ]},
   {applications, [
                   kernel,
-                  stdlib,
-		  mnesia
+                  stdlib
                  ]},
   {mod, { versionserver_app, []}},
-  {env, []}
+  {env, [{db_dir, "/tmp/versionserver"}]}
  ]}.
