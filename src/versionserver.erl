@@ -47,18 +47,19 @@ init([]) ->
 	{ok, none}.
 
 handle_call({get_build_number, Proj, Version}, From, State) ->
-	Request = {get_build_number, Version, From},
-	cast_to_project(Proj, Request),
+	Pid = get_proj_pid(Proj),
+	versionserver_proj:reply_build_number(Pid, Version, From),
 	{noreply, State};
 handle_call(stop, _From, State) ->
 	{stop, normal, ok, State}.
 
 handle_cast({set_build_number, Proj, Version, Build}, State) ->
-	Request = {set_build_number, Version, Build},
-	cast_to_project(Proj, Request),
+	Pid = get_proj_pid(Proj),
+	versionserver_proj:set_build_number(Pid, Version, Build),
 	{noreply, State};
-handle_cast(Request={delete_project, Proj}, State) ->
-	cast_to_project(Proj, Request),
+handle_cast({delete_project, Proj}, State) ->
+	Pid = get_proj_pid(Proj),
+	versionserver_proj:delete_project(Pid, Proj),
 	{noreply, State}.
 
 handle_info({'EXIT', ProjPid, _Reason}, State) ->
@@ -78,16 +79,15 @@ code_change(_OldVsn, State, _Extra) ->
 %% Private functions
 %% ===================================================================
 
-cast_to_project(Proj, Request) ->
-	ProjPid = case ets:lookup(?MODULE, Proj) of
+get_proj_pid(Proj) ->
+	case ets:lookup(?MODULE, Proj) of
 		[{Proj, Pid}] ->
 			Pid;
 		[] ->
 			Pid = versionserver_proj:start_link(Proj),
 			ets:insert(?MODULE, {Proj, Pid}),
 			Pid
-	end,
-	gen_server:cast(ProjPid, Request).
+	end.
 
 cleanup(ProjPid) ->
 	ets:match_delete(?MODULE, {'_', ProjPid}).
