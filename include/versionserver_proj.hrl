@@ -1,1 +1,0 @@
--record(versionserver_proj, {project, version, build}).
