@@ -1,10 +1,11 @@
 -module(versionserver).
+-author("Ondrej Kupka <ondra.cap@gmail.com>")
 
 -behaviour(gen_server).
 
 -define(INT(Var), is_integer(Var)).
 
-%% API functions
+%% API
 -export([start/0, start_link/0, stop/0,
 	 get_build_number/2, set_build_number/3,
 	 clean_project/1, delete_project/1]).

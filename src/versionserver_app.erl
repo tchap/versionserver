@@ -1,4 +1,5 @@
 -module(versionserver_app).
+-author("Ondrej Kupka <ondra.cap@gmail.com>")
 
 -behaviour(application).
 

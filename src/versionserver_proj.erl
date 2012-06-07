@@ -1,8 +1,9 @@
 -module(versionserver_proj).
+-author("Ondrej Kupka <ondra.cap@gmail.com>")
 
 -behaviour(gen_server).
 
-%% API functions
+%% API
 -export([start/1, start_link/1, stop/1,
 	 reply_build_number/3, set_build_number/3,
 	 clean_project/1, delete_project/1]).
