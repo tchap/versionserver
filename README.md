@@ -3,11 +3,11 @@ versionserver
 [![Build Status](https://secure.travis-ci.org/tchap/versionserver.png?branch=master)](http://travis-ci.org/tchap/versionserver)
 
 A tiny OTP application that generates subsequent build numbers for projects
-according to the version number specified.
+according to the major, minor and release number specified.
 
 To put it simply, it basically keeps a mapping of
 	
-	{Project, {Major, Minor, Release}} -> LastBuild
+`{Project, {Major, Minor, Release}} -> LastBuild`
 
 and keeps incrementing the counter.
 
