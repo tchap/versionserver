@@ -30,7 +30,7 @@
 
 %% API
 -export([start/0, start_link/0, stop/0,
-	 get_build_number/2, set_build_number/3,
+	 next_build_number/2, set_build_number/3,
 	 clean_project/1, delete_project/1]).
 
 %% Server callbacks
@@ -47,9 +47,9 @@ start() ->
 start_link() ->
 	gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
-get_build_number(Proj, Version={Maj, Min, Rel})
+next_build_number(Proj, Version={Maj, Min, Rel})
     when is_atom(Proj), ?INT(Maj), ?INT(Min), ?INT(Rel) ->
-	gen_server:call(?MODULE, {get_build_number, Proj, Version}).
+	gen_server:call(?MODULE, {next_build_number, Proj, Version}).
 
 set_build_number(Proj, Version={Maj, Min, Rel}, Build)
     when is_atom(Proj), ?INT(Maj), ?INT(Min), ?INT(Rel), ?INT(Build) ->
@@ -73,7 +73,7 @@ init([]) ->
 	ets:new(?MODULE, [set, named_table]),
 	{ok, empty_state}.
 
-handle_call({get_build_number, Proj, Version}, From, State) ->
+handle_call({next_build_number, Proj, Version}, From, State) ->
 	Pid = get_proj_pid(Proj),
 	versionserver_proj:reply_build_number(Pid, Version, From),
 	{noreply, State};
