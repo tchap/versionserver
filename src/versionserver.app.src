@@ -1,8 +1,8 @@
 %% vim: set filetype=erlang:
 {application, versionserver,
  [
-  {description, "A RESTful web service managing project build numbers"},
-  {vsn, "1"},
+  {description, "An OTP application managing project build numbers"},
+  {vsn, "1.0.0"},
   {registered, [
   		versionserver, 
   		versionserver_sup
@@ -17,6 +17,6 @@
                   kernel,
                   stdlib
                  ]},
-  {mod, { versionserver_app, []}},
+  {mod, {versionserver_app, []}},
   {env, [{db_dir, "/tmp/versionserver"}]}
  ]}.

@@ -1,6 +1,9 @@
-DBDIR=/tmp/versionserver_db
+.PHONY: all compile clean
 
-.PHONY: install run
+all: compile
 
-all:
+compile:
 	./rebar compile
+
+clean:
+	./rebar clean

@@ -2,11 +2,11 @@ versionserver
 =============
 
 A tiny OTP application that generates subsequent build numbers for projects
-according to the version number received.
+according to the version number specified.
 
-The last build numbers for all projects are being kept in Mnesia.
-Since there is a single process handling all request for a particular project,
-we don't need transactions and we can bypass all the transaction protocols.
+To put it simply, it basically keeps a mapping of
+	
+	{Project, {Major, Minor, Release}} -> Build.
 
-NOTE: This project is an early prototype at the moment!
-      Not all error conditions are handled properly, use with caution!
+The application spawns a new process for every project.
+The process then keeps its Version -> LastBuild mapping in a DETS table.
