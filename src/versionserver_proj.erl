@@ -4,7 +4,8 @@
 
 %% API functions
 -export([start/1, start_link/1, stop/1,
-	 reply_build_number/3, set_build_number/3, delete_project/1]).
+	 reply_build_number/3, set_build_number/3,
+	 clean_project/1, delete_project/1]).
 
 %% Server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -27,6 +28,9 @@ reply_build_number(ProjPid, Version, To) ->
 
 set_build_number(ProjPid, Version, Build) ->
 	gen_server:cast(ProjPid, {set_build_number, Version, Build}).
+
+clean_project(ProjPid) ->
+	gen_server:cast(ProjPid, clean_project).
 
 delete_project(ProjPid) ->
 	gen_server:cast(ProjPid, delete_project).
@@ -66,13 +70,18 @@ handle_cast({reply_build_number, Version, To}, State) ->
 handle_cast({set_build_number, Version, Build}, State) ->
 	set_buildnum(State#state.table, Version, Build),
 	{noreply, State};
+handle_cast(clean_project, State) ->
+	cln_project(State#state.table),
+	{noreply, State};
 handle_cast(delete_project, State) ->
 	del_project(State#state.table),
-	{noreply, State}.
+	{stop, normal, deleted}.
 
 handle_info(_Info, State) ->
 	{noreply, State}.
 
+terminate(_Reason, deleted) ->
+	ok;
 terminate(_Reason, State) ->
 	dets:close(State#state.table),
 	ok.
@@ -107,6 +116,10 @@ set_buildnum(Table, Version, Build) ->
 	end.
 
 del_project(Table) ->
+	ok = dets:close(Table),
+	ok = file:delete(get_dbfile_path(Table)).
+
+cln_project(Table) ->
 	case dets:delete_all_objects(Table) of
 		ok -> ok;
 		{error, Reason} -> erlang:exit(Reason)

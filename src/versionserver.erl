@@ -6,7 +6,8 @@
 
 %% API functions
 -export([start/0, start_link/0, stop/0,
-	 get_build_number/2, set_build_number/3, delete_project/1]).
+	 get_build_number/2, set_build_number/3,
+	 clean_project/1, delete_project/1]).
 
 %% Server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -29,6 +30,9 @@ get_build_number(Proj, Version={Maj, Min, Rel})
 set_build_number(Proj, Version={Maj, Min, Rel}, Build)
     when is_atom(Proj), ?INT(Maj), ?INT(Min), ?INT(Rel), ?INT(Build) ->
 	gen_server:cast(?MODULE, {set_build_number, Proj, Version, Build}).
+
+clean_project(Proj) when is_atom(Proj) ->
+	gen_server:cast(?MODULE, {clean_project, Proj}).
 
 delete_project(Proj) when is_atom(Proj) ->
 	gen_server:cast(?MODULE, {delete_project, Proj}).
@@ -56,10 +60,13 @@ handle_cast({set_build_number, Proj, Version, Build}, State) ->
 	Pid = get_proj_pid(Proj),
 	versionserver_proj:set_build_number(Pid, Version, Build),
 	{noreply, State};
+handle_cast({clean_project, Proj}, State) ->
+	Pid = get_proj_pid(Proj),
+	versionserver_proj:clean_project(Pid),
+	{noreply, State};
 handle_cast({delete_project, Proj}, State) ->
 	Pid = get_proj_pid(Proj),
 	versionserver_proj:delete_project(Pid),
-	versionserver_proj:stop(Pid),
 	{noreply, State}.
 
 handle_info({'EXIT', ProjPid, _Reason}, State) ->
