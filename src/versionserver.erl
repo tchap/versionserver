@@ -2,7 +2,6 @@
 
 -behaviour(gen_server).
 
--define(PROJ_MODULE, versionserver_proj).
 -define(INT(Var), is_integer(Var)).
 
 %% API functions
@@ -44,7 +43,7 @@ stop() ->
 init([]) ->
 	process_flag(trap_exit, true),
 	ets:new(?MODULE, [set, named_table]),
-	{ok, none}.
+	{ok, empty_state}.
 
 handle_call({get_build_number, Proj, Version}, From, State) ->
 	Pid = get_proj_pid(Proj),
@@ -85,7 +84,7 @@ get_proj_pid(Proj) ->
 		[{Proj, Pid}] ->
 			Pid;
 		[] ->
-			Pid = versionserver_proj:start_link(Proj),
+			{ok, Pid} = versionserver_proj:start_link(Proj),
 			ets:insert(?MODULE, {Proj, Pid}),
 			Pid
 	end.

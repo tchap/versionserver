@@ -17,10 +17,10 @@
 %% ===================================================================
 
 start(Project) when is_atom(Project) ->
-	get_server:start(?MODULE, [Project], []).
+	gen_server:start(?MODULE, Project, []).
 
 start_link(Project) when is_atom(Project) ->
-	gen_server:start_link(?MODULE, [Project], []).
+	gen_server:start_link(?MODULE, Project, []).
 
 reply_build_number(ProjPid, Version, To) ->
 	gen_server:cast(ProjPid, {reply_build_number, Version, To}).
@@ -32,7 +32,7 @@ delete_project(ProjPid) ->
 	gen_server:cast(ProjPid, delete_project).
 
 stop(ProjPid) ->
-	get_server:call(ProjPid, stop).
+	gen_server:call(ProjPid, stop).
 
 %% ===================================================================
 %% Server callbacks
@@ -85,12 +85,20 @@ code_change(_OldVsn, State, _Extra) ->
 %% ===================================================================
 
 get_dbfile_path(Proj) ->
-	Dirname = application:get_env(db_dir),
-	Filename = lists:concat([Proj, ".dets"]),
-	file:join(Dirname, Filename).
+	{ok, Dirname} = application:get_env(db_dir),
+	Filename = atom_to_list(Proj) ++ ".dets",
+	filename:join(Dirname, Filename).
 
 next_buildnum(Table, Version) ->
-	dets:update_counter(Table, Version, 1).
+	try 
+		dets:update_counter(Table, Version, 1)
+	catch
+		error:_ ->
+			case dets:insert(Table, {Version, 1}) of
+				ok -> 1;
+				Error -> Error
+			end
+	end.
 
 set_buildnum(Table, Version, Build) ->
 	case dets:insert(Table, {Version, Build}) of
