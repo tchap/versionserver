@@ -6,7 +6,9 @@ according to the version number specified.
 
 To put it simply, it basically keeps a mapping of
 	
-	{Project, {Major, Minor, Release}} -> Build.
+	{Project, {Major, Minor, Release}} -> LastBuild
+
+and keeps incrementing the counter.
 
 The application spawns a new process for every project.
 The process then keeps its Version -> LastBuild mapping in a DETS table.
